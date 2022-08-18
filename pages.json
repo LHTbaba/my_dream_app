@@ -7,15 +7,35 @@
 			}
 		},
 		{
+			"path": "pages/select/index",
+			"style": {
+				"navigationBarTitleText": "选择角色",
+				"navigationBarBackgroundColor": "#2ea44f",
+				"navigationBarTextStyle": "#ffffff"
+			}
+		},
+		{
 			"path": "pages/user/index",
 			"style": {
 				"navigationBarTitleText": "我的"
+			}
+		},
+		{
+			"path": "pages/login/index",
+			"style": {
+				"navigationBarTitleText": "登录页"
+			}
+		},
+		{
+			"path": "pages/jobDetail/index",
+			"style": {
+				"navigationBarTitleText": "职位详情"
 			}
 		}
 	],
 	"tabBar": {
     "color": "#7A7E83",
-    "selectedColor": "#175df3",
+    "selectedColor": "#1ab109",
     "borderStyle": "black",
     "backgroundColor": "#ffffff",
     "list": [{

@@ -18,24 +18,21 @@
       <div class="content-item" v-for="(item, index) in dataList" :key="index">
         <div class="line-one">
           <div class="address">
-            <img src="../../static/img/address-icon.svg" class="address-icon">
-            <p>{{item.AZC004}}{{item.AZC005}}</p>
+            <p>{{item.name}}</p>
           </div>
-          <p class="see-result" @click="seeResult(item)">查看职位详情</p>
         </div>
         <div class="line-middle">
           <div class="item">
             <p class="title">工作地点</p>
-            <p class="text">{{item.AAD001}}</p>
+            <p class="text">{{item.areaName}}</p>
           </div>
           <div class="item">
             <p class="title">预计薪资</p>
-            <p class="text red">{{item.SCORE}}</p>
+            <p class="text red">{{item.salary}}元/{{item.salaryStyle}}</p>
           </div>
         </div>
-        <div class="bottom" @click="addGrade(item)">
-          <img src="../../static/img/plus-icon.svg" class="plus-icon">
-          <p>我要报名</p>
+        <div class="bottom" @click="seeResult(item)">
+          <p>立即查看</p>
         </div>
       </div>
       <view class="no-data" v-if="(pageSize >= total || noMore)">
@@ -51,43 +48,8 @@ export default {
     return {
       selectYear: '2022',
       searchKey: '',
-      dataList: [{
-				AZC004: '江西省',
-				AZC005: '南昌市',
-				SCORE: '4000',
-				AAD001: '电子厂'
-			}, {
-				AZC004: '江西省',
-				AZC005: '南昌市',
-				SCORE: '4000',
-				AAD001: '电子厂'
-			}, {
-				AZC004: '江西省',
-				AZC005: '南昌市',
-				SCORE: '4000',
-				AAD001: '电子厂'
-			}, {
-				AZC004: '江西省',
-				AZC005: '南昌市',
-				SCORE: '4000',
-				AAD001: '电子厂'
-			}, {
-				AZC004: '江西省',
-				AZC005: '南昌市',
-				SCORE: '4000',
-				AAD001: '电子厂'
-			}, {
-				AZC004: '江西省',
-				AZC005: '南昌市',
-				SCORE: '4000',
-				AAD001: '电子厂'
-			}, {
-				AZC004: '江西省',
-				AZC005: '南昌市',
-				SCORE: '4000',
-				AAD001: '电子厂'
-			}],
-      pageSize: 8,
+      dataList: [],
+      pageSize: 10,
       pageIndex: 1,
       total: 0,
       noMore: false,
@@ -96,24 +58,33 @@ export default {
   },
   onShow() {
     this.pageIndex = 1
-    // this.fetchData()
+    this.fetchData()
   },
   methods: {
     fetchData() {
-      var userId = uni.getStorageSync('userId')
-      this.$api.cjpfList({
-        'cmd.USERID': userId,
-        'cmd.QTOYEAR': this.selectYear,
-        'cmd.QNAME': this.searchKey,
-        'cmd.QSORT': this.sort,
-        'cmd.QPAGENO': this.pageIndex,
-        'cmd.QPAGESIZE': this.pageSize
-      }).then(res => {
-        this.dataList = res[0].LIST
-        this.total = res[0].QTOTALCOUNT
-      }).catch(err => {
-        console.log(err)
-      })
+      if(uni.getStorageSync('loginType') === '1') {
+        this.$api.getJobList({
+          pageNum: this.pageIndex,
+          pageSize: this.pageSize
+        }).then(res => {
+          this.dataList = res.rows
+        }).catch(err => {
+          console.log(err)
+        })
+      }else if(uni.getStorageSync('loginType') === '2') {
+        this.$api.getJobListTwo({
+          pageNum: this.pageIndex,
+          pageSize: this.pageSize
+        }).then(res => {
+          this.dataList = res.rows
+        }).catch(err => {
+          console.log(err)
+        })
+      }else {
+        uni.reLaunch({
+          url: '/pages/select/index'
+        })
+      }
     },
     dateChange(e) {
       this.selectYear = e.detail.value
@@ -129,34 +100,34 @@ export default {
       this.pageIndex = 1
       this.fetchData()
     },
-    addGrade(item) {
-      uni.navigateTo({
-        url:'../cjpfList/addGrade?id=' + item.NH_ID
-      })
-    },
     seeResult(item) {
       uni.navigateTo({
-        url:'../cjpfList/gradeResult?id=' + item.NH_ID
+        url:'/pages/jobDetail/index?id=' + item.id
       })
     },
     scrolltolower() {
-      var userId = uni.getStorageSync('userId')
       if(this.pageSize * this.pageIndex < this.total) {
         this.pageIndex++
         uni.showLoading()
-        this.$api.cjpfList({
-          'cmd.USERID': userId,
-          'cmd.QTOYEAR': this.selectYear,
-          'cmd.QNAME': this.searchKey,
-          'cmd.QSORT': this.sort,
-          'cmd.QPAGENO': this.pageIndex,
-          'cmd.QPAGESIZE': this.pageSize
-        }).then(res => {
-          uni.hideLoading()
-          this.dataList = this.dataList.concat(res[0].LIST)
-        }).catch(err => {
-          console.log(err)
-        })
+        if(uni.getStorageSync('loginType') === '1') {
+          this.$api.getJobList({
+            pageNum: this.pageIndex,
+            pageSize: this.pageSize
+          }).then(res => {
+            this.dataList = this.dataList.concat(res.rows)
+          }).catch(err => {
+            console.log(err)
+          })
+        }else if(uni.getStorageSync('loginType') === '2') {
+          this.$api.getJobListTwo({
+            pageNum: this.pageIndex,
+            pageSize: this.pageSize
+          }).then(res => {
+            this.dataList = this.dataList.concat(res.rows)
+          }).catch(err => {
+            console.log(err)
+          })
+        }
       }else {
         this.noMore = true
       }
@@ -219,7 +190,7 @@ export default {
     padding-top: 32rpx;
     .content-item {
       width: 686rpx;
-      height: 314rpx;
+      height: 280rpx;
       margin: 32rpx auto;
       border-radius: 8rpx;
       box-shadow: 0rpx 0rpx 40rpx rgba(0, 0, 0, 0.06);
@@ -268,21 +239,16 @@ export default {
       }
       .bottom {
         width: 622rpx;
-        height: 74rpx;
+        height: 60rpx;
         display: flex;
         justify-content: center;
         align-items: center;
-        margin: 34rpx auto 0 auto;
-        border-radius: 8rpx;
-        font-size: 28rpx;
+        margin: 20rpx auto 0 auto;
+        border-radius: 20rpx;
+        font-size: 32rpx;
         color: rgb(11, 176, 127);
         border: 2rpx solid rgba(11, 176, 127, 1);
-        background: rgba(11, 176, 127, 0.08);
-        .plus-icon {
-          width: 32rpx;
-          height: 32rpx;
-          margin-right: 17rpx;
-        }
+        background: rgba(11, 176, 127, 0.3);
       }
     }
     .no-data {

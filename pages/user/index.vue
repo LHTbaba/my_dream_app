@@ -53,11 +53,9 @@
 			}
 		},
 		onShow() {
-			if(this.$store.state.hasLogin) {
-				this.avatar = this.$store.state.userInfo.avatarUrl
-				this.name = this.$store.state.userInfo.nickName
-				this.getStatistics()
-			}
+			this.avatar = this.$store.state.userInfo.avatarUrl
+			this.name = this.$store.state.userInfo.nickName
+			// this.getStatistics()
 		},
 		methods: {
 			getNumber() {
@@ -71,7 +69,7 @@
 				//iv
 			},
       logins() {
-				if(this.$store.state.hasLogin) {
+				if(this.$store.state.loginType) {
 					uni.showToast({
 						icon: "none",
 						title: '已经是登录状态，不用重复登录！'
@@ -81,7 +79,6 @@
 					uni.getUserProfile({
 						desc:"用于完善用户信息",
 						success: (res) => {
-							console.log(res)
 							this.$store.commit('getUserinfo', res.userInfo)
 							this.avatar = res.userInfo.avatarUrl
 							this.name = res.userInfo.nickName
@@ -94,7 +91,7 @@
 								success: (res) => {
 									var code = res.code
 									this.$api.login({
-										code: code
+										jsCode: code
 									}).then(res => {
 										this.$store.commit('login', res)
 										this.getStatistics()
@@ -130,7 +127,7 @@
 				})
 			},
 			logOut() {
-				if(this.$store.state.hasLogin) {
+				if(uni.getStorageSync('loginType')) {
 					// 登录状态下可退出登录
 					uni.showModal({
 						title: '提示',
@@ -146,6 +143,9 @@
 									title: '已退出！'
 								})
 								this.$store.commit('logout', res)
+								uni.navigateTo({
+									url: '/pages/select/index'
+								})
 							}else if (res.cancel) {
 								uni.showToast({
 									icon: "none",

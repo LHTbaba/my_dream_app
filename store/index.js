@@ -2,21 +2,19 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 Vue.use(Vuex);
 let openid = uni.getStorageSync("openid")
-let hasLogin = uni.getStorageSync("hasLogin")
+let loginType = uni.getStorageSync("loginType")
 let userInfo = uni.getStorageSync("userInfo")
 const store=new Vuex.Store({
 	state:{
 		openid: openid ? openid : '',
-		hasLogin: hasLogin ? hasLogin : false,
+		loginType: loginType ? loginType : false,
 		userInfo: userInfo ? userInfo : {}
 	},
 	
 	mutations:{
 		login(state, loginData) {
 			state.openid = loginData.openid
-			state.hasLogin = true
 			uni.setStorageSync('openid', state.openid)
-			uni.setStorageSync('hasLogin', state.hasLogin)
 		},
 		getUserinfo(state, userInfo) {
 			state.userInfo = userInfo
@@ -25,10 +23,13 @@ const store=new Vuex.Store({
 		logout(state) {
 			state.openid = ''
 			state.userInfo = {}
-			state.hasLogin = false
+			state.loginType = ''
 			uni.removeStorageSync('openid')
 			uni.removeStorageSync('hasLogin')
 			uni.removeStorageSync('userInfo')
+			uni.removeStorageSync('loginType')
+			uni.removeStorageSync('sessionId')
+			uni.removeStorageSync('sessionKey')
 		},
 	},
 	actions:{
