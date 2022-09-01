@@ -109,7 +109,7 @@ export default {
   width: 100%;
   height: 100vh;
   justify-content: center;
-  background: #2ea44f;
+  background: #10AFA9;
   .inner_box{
     display: flex;
     flex-direction: column;

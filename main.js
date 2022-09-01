@@ -4,6 +4,7 @@ import Vue from 'vue'
 import store from "./store"
 import api from './http/httpUtils.js'
 import baseUrl from './http/config.js'
+import  './static/iconfont/iconfont.css'
 // 全局挂载后使用
 Vue.prototype.$api = api
 Vue.prototype.$store = store;

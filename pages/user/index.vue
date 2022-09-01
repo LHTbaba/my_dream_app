@@ -8,26 +8,36 @@
 			</view>
 		</view>
 		<!-- <button open-type="getPhoneNumber" @getphonenumber="getPhoneNumber" withCredentials="true" @click="getNumber">手机号一键登录</button> -->
-		<view class="block-panel">
-			<view class="block-item" @click="goComplainList('')">
-				<p class="number one-number">{{statisticsNum.QB ? statisticsNum.QB : 0}}</p>
-				<p class="title-text">全部报名</p>
+		<template v-if="type === '2'">
+			<view class="block-panel">
+				<view class="block-item" @click="goComplainList('')">
+					<i class="iconfont liht-shoucang number one-number"></i>
+					<p class="title-text">已收藏</p>
+				</view>
+				<view class="block-item" @click="goComplainList('002')">
+					<i class="iconfont liht-renyuanbaoming number two-number"></i>
+					<p class="title-text">已报名</p>
+				</view>
 			</view>
-			<view class="block-item" @click="goComplainList('002')">
-				<p class="number two-number">{{statisticsNum.BLZ ? statisticsNum.BLZ : 0}}</p>
-				<p class="title-text">审核中</p>
+			<view class="block-panel">
+				<view class="block-item" @click="goComplainList('003')">
+					<i class="iconfont liht-cooperation number three-number"></i>
+					<p class="title-text">已录用</p>
+				</view>
 			</view>
-		</view>
-		<view class="block-panel">
-			<view class="block-item" @click="goComplainList('003')">
-				<p class="number three-number">{{statisticsNum.YBL ? statisticsNum.YBL : 0}}</p>
-				<p class="title-text">已审核</p>
+		</template>
+		<template v-else>
+			<view class="block-panel">
+				<view class="block-item" @click="goComplainList('002')">
+					<i class="iconfont liht-renyuanbaoming number two-number"></i>
+					<p class="title-text">报名总人数</p>
+				</view>
+				<view class="block-item" @click="goComplainList('003')">
+					<i class="iconfont liht-cooperation number three-number"></i>
+					<p class="title-text">录用总人数</p>
+				</view>
 			</view>
-			<view class="block-item" @click="goComplainList('004')">
-				<p class="number four-number">{{statisticsNum.YBJ ? statisticsNum.YBJ : 0}}</p>
-				<p class="title-text">已报名</p>
-			</view>
-		</view>
+		</template>
 		<view class="setting">
 			<view class="setting-panel">
 				<p class="title">设置选项</p>
@@ -47,12 +57,14 @@
 	export default {
 		data() {
 			return {
+				type: '',
 				avatar: '',
 				name: '',
 				statisticsNum: {}
 			}
 		},
 		onShow() {
+			this.type = uni.getStorageSync('loginType')
 			this.avatar = this.$store.state.userInfo.avatarUrl
 			this.name = this.$store.state.userInfo.nickName
 			// this.getStatistics()
@@ -215,13 +227,12 @@
 			display: flex;
 			flex-direction: column;
 			justify-content: center;
+			align-items: center;
 			border-radius: 20rpx;
 			background: #ffffff;
 			.number {
-				font-family: Poppins;
-				font-weight: SemiBold;
-				font-size: 40rpx;
-				line-height: 48rpx;
+				font-size: 60rpx;
+				line-height: 60rpx;
 			}
 			.one-number {
 				color: #B45309;

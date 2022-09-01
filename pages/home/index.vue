@@ -1,38 +1,33 @@
 <template>
   <div class="cjpf-page">
     <div class="header-bar">
-      <picker class="picker" mode="date" fields="year" :value="selectYear" start="2021" end="2050" @change="dateChange">
-        <span class="text">
-          {{selectYear}}年
-        </span>
-        <image class="select-icon" src="../../static/img/select.svg" mode=""></image>
-      </picker>
-      <div class="right">
-        <uni-search-bar v-model="searchKey" class="search" radius="100" placeholder="请输入" clearButton="none" cancelButton="none" @confirm="search" />
-        <div class="spline"></div>
-        <img src="../../static/img/icons_sort.svg" class="filter" @click="changeSort" v-if="sort === '1'">
-        <img src="../../static/img/icons_sort_active.svg" class="filter" @click="changeSort" v-else>
+      <div class="search">
+        <uni-search-bar v-model="searchKey" radius="100" placeholder="搜索企业" bgColor="#74d4cf" clearButton="none" cancelButton="none" @confirm="search" />
+      </div>
+      <div class="change-panel">
+        <p class="change-text" :class="{'active': type === '1'}" @click="changeType('1')">线上兼职</p>
+        <p class="change-text" :class="{'active': type === '2'}" @click="changeType('2')">线下兼职</p>
       </div>
     </div>
     <scroll-view class="content-panel" scroll-y="true" @scrolltolower="scrolltolower">
       <div class="content-item" v-for="(item, index) in dataList" :key="index">
         <div class="line-one">
-          <div class="address">
-            <p>{{item.name}}</p>
-          </div>
+          <p class="left">{{item.companyName}}</p>
+          <p class="right">{{item.salary}}/{{item.salaryStyle}}</p>
         </div>
-        <div class="line-middle">
-          <div class="item">
-            <p class="title">工作地点</p>
-            <p class="text">{{item.areaName}}</p>
-          </div>
-          <div class="item">
-            <p class="title">预计薪资</p>
-            <p class="text red">{{item.salary}}元/{{item.salaryStyle}}</p>
-          </div>
+        <div class="line-two">
+          <p class="text">{{item.name}}</p>
+          <p class="text">{{item.workMethod}}</p>
         </div>
-        <div class="bottom" @click="seeResult(item)">
-          <p>立即查看</p>
+        <div class="line-three">
+          <p class="tag-item" v-for="(inItem, index) in item.brightPoints" :key="index">{{inItem}}</p>
+        </div>
+        <div class="line-four">
+          <div class="left">
+            <i class="iconfont liht-zuobiaofill"></i>
+            <p>{{item.areaName}}</p>
+          </div>
+          <div class="right" @click="seeResult(item)">立即查看</div>
         </div>
       </div>
       <view class="no-data" v-if="(pageSize >= total || noMore)">
@@ -46,37 +41,38 @@
 export default {
   data() {
     return {
-      selectYear: '2022',
+      type: '1',
       searchKey: '',
       dataList: [],
       pageSize: 10,
       pageIndex: 1,
       total: 0,
       noMore: false,
-      sort: '1'
+      sort: '1',
+      brightList: []
     }
   },
   onShow() {
     this.pageIndex = 1
-    this.fetchData()
+    this.getBrightDict()
   },
   methods: {
-    fetchData() {
+    changeType(type) {
+      this.type = type
+    },
+    // 获取职位亮点字典
+    getBrightDict() {
       if(uni.getStorageSync('loginType') === '1') {
-        this.$api.getJobList({
-          pageNum: this.pageIndex,
-          pageSize: this.pageSize
-        }).then(res => {
-          this.dataList = res.rows
+        this.$api.getBrightDict().then(res => {
+          this.brightList = res.rows
+          this.fetchData()
         }).catch(err => {
           console.log(err)
         })
       }else if(uni.getStorageSync('loginType') === '2') {
-        this.$api.getJobListTwo({
-          pageNum: this.pageIndex,
-          pageSize: this.pageSize
-        }).then(res => {
-          this.dataList = res.rows
+        this.$api.getBrightDictTwo().then(res => {
+          this.brightList = res.rows
+          this.fetchData()
         }).catch(err => {
           console.log(err)
         })
@@ -86,10 +82,51 @@ export default {
         })
       }
     },
-    dateChange(e) {
-      this.selectYear = e.detail.value
-      this.pageIndex = 1
-      this.fetchData()
+    // 获取列表数据
+    fetchData() {
+      if(uni.getStorageSync('loginType') === '1') {
+        this.$api.getJobList({
+          pageNum: this.pageIndex,
+          pageSize: this.pageSize
+        }).then(res => {
+          this.dataList = res.rows
+          this.total = res.total
+          // 处理职位亮点
+          this.dataList.map(item => {
+            item.brightPoints = item.brightPoints.split(',')
+            item.brightPoints.map((inItem, index) => {
+              this.brightList.map(bItem => {
+                if(inItem === bItem.dictValue) {
+                  item.brightPoints[index] = bItem.dictLabel
+                }
+              })
+            })
+          })
+        }).catch(err => {
+          console.log(err)
+        })
+      }else if(uni.getStorageSync('loginType') === '2') {
+        this.$api.getJobListTwo({
+          pageNum: this.pageIndex,
+          pageSize: this.pageSize
+        }).then(res => {
+          this.dataList = res.rows
+          this.total = res.total
+          // 处理职位亮点
+          this.dataList.map(item => {
+            item.brightPoints = item.brightPoints.split(',')
+            item.brightPoints.map((inItem, index) => {
+              this.brightList.map(bItem => {
+                if(inItem === bItem.dictValue) {
+                  item.brightPoints[index] = bItem.dictLabel
+                }
+              })
+            })
+          })
+        }).catch(err => {
+          console.log(err)
+        })
+      }
     },
     search() {
       this.pageIndex = 1
@@ -139,116 +176,125 @@ export default {
 <style lang="scss" scoped>
 .cjpf-page {
   position: relative;
-  padding-top: 40rpx;
+  padding-top: 228rpx;
   box-sizing: border-box;
   .header-bar {
     position: absolute;
     top: 0;
     width: 100%;
-    height: 80rpx;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border: 2rpx solid rgb(243, 246, 243);
-    .picker {
-      display: flex;
-      align-items: center;
-      padding-left: 32rpx;
-      line-height: 80rpx;
-      font-size: 32rpx;
-      position: relative;
-      .select-icon {
-        position: absolute;
-        top: 26rpx;
-        left: 150rpx;
-        width: 32rpx;
-        height: 32rpx;
+    height: 228rpx;
+    padding: 77rpx 0 0 38rpx;
+    box-sizing: border-box;
+    background: #38C1BA;
+    .search {
+      width: 504rpx;
+      /deep/.uni-searchbar {
+        padding: 0;
+        .uni-searchbar__box {
+          justify-content: flex-start;
+          .uni-icons {
+            color: #ffffff !important;
+          }
+          .uni-searchbar__text-placeholder {
+            color: #ffffff !important;
+          }
+          .uni-searchbar__box-search-input {
+            color: #ffffff !important;
+          }
+        }
       }
     }
-    .right {
-      padding-right: 32rpx;
+    .change-panel {
       display: flex;
-      align-items: center;
-      .search {
-        width: 350rpx;
+      margin-top: 20rpx;
+      .change-text {
+        margin-right: 30rpx;
+        font-size: 32rpx;
+        font-weight: bold;
+        color: #b0e7e6;
       }
-      .spline {
-        width: 2rpx;
-        height: 32rpx;
-        margin: 0 32rpx;
-        background: rgb(230, 234, 234);
-      }
-      .filter {
-        width: 48rpx;
-        height: 48rpx;
+      .active {
+        color: #ffffff;
       }
     }
   }
   .content-panel {
-    height: calc(100vh - 80rpx);
+    height: calc(100vh - 228rpx);
     overflow: auto;
-    padding-top: 32rpx;
     .content-item {
-      width: 686rpx;
-      height: 280rpx;
-      margin: 32rpx auto;
-      border-radius: 8rpx;
+      padding: 36rpx;
+      margin: 16rpx auto;
       box-shadow: 0rpx 0rpx 40rpx rgba(0, 0, 0, 0.06);
+      box-sizing: border-box;
       .line-one {
-        height: 64rpx;
-        padding: 0 32rpx;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        .left {
+          width: 70%;
+          font-size: 36rpx;
+          font-weight: bold;
+          color: #252525;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .right {
+          width: 30%;
+          color: #10AFA9;
+          text-align: right;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+      }
+      .line-two {
+        margin-top: 25rpx;
+        display: flex;
+        .text {
+          margin-right: 53rpx;
+          color: #717171;
+        }
+      }
+      .line-three {
+        width: 100%;
+        margin-top: 36rpx;
+        display: flex;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        .tag-item {
+          margin-right: 8rpx;
+          padding: 0 16rpx;
+          color: #717171;
+          background: #95959522;
+          line-height: 41rpx;
+          font-size: 24rpx;
+        }
+      }
+      .line-four {
+        margin-top: 41rpx;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        font-size: 24rpx;
-        .address {
+        .left {
           display: flex;
-          line-height: 36rpx;
-          color: rgb(107, 116, 115);
-          .address-icon {
-            width: 36rpx;
-            height: 36rpx;
-            margin-right: 4rpx;
+          align-items: center;
+          font-size: 24rpx;
+          color: #717171;
+          i {
+            color: #10AFA9;
           }
         }
-        .see-result {
-          color: rgb(21, 151, 246);
+        .right {
+          height: 32rpx;
+          padding: 0 16rpx;
+          line-height: 32rpx;
+          border-radius: 13rpx;
+          font-size: 24rpx;
+          color: #ffffff;
+          background: #10AFA9;
         }
-      }
-      .line-middle {
-        height: 94rpx;
-        padding: 0 32rpx;
-        display: flex;
-        justify-content: space-between;
-        .item {
-          .title {
-            font-size: 24rpx;
-            line-height: 36rpx;
-            color: rgb(169, 183, 181);
-          }
-          .text {
-            font-size: 36rpx;
-            line-height: 52rpx;
-            color: rgb(66, 66, 66);
-            font-weight: bold;
-          }
-          .red {
-            color: rgb(247, 112, 112);
-          }
-        }
-      }
-      .bottom {
-        width: 622rpx;
-        height: 60rpx;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin: 20rpx auto 0 auto;
-        border-radius: 20rpx;
-        font-size: 32rpx;
-        color: rgb(11, 176, 127);
-        border: 2rpx solid rgba(11, 176, 127, 1);
-        background: rgba(11, 176, 127, 0.3);
       }
     }
     .no-data {

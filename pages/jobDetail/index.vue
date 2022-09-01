@@ -1,24 +1,41 @@
 <template>
   <div class="job-detail-page">
     <div class="info-panel">
-      <p class="salary">{{dataInfo.salary}}/{{dataInfo.salaryStyle}}</p>
-      <p class="work-method">{{dataInfo.workMethod}}</p>
-      <img src="../../static/img/salary_icon.svg" class="salary-icon">
+      <div class="left">
+        <p class="name">{{dataInfo.companyName}}</p>
+        <p class="area">
+          <i class="iconfont liht-zuobiaofill"></i>
+          {{dataInfo.areaName}}
+        </p>
+      </div>
+      <div class="right">{{dataInfo.salary}}/{{dataInfo.salaryStyle}}</div>
     </div>
-    <div class="info-panel" v-html="dataInfo.description"></div>
     <div class="info-panel create-info">
-      <img class="avatar" :src="'https://www.jundinghr.com/prod-api' + dataInfo.sysUser.avatar" v-if="dataInfo.sysUser.avatar">
-      <img class="avatar" src="../../static/img/avatar.svg" v-else>
+      <img class="avatar" src="../../static/img/avatar.svg">
+      <!-- <img class="avatar" :src="'https://www.jundinghr.com/prod-api' + dataInfo.sysUser.avatar"> -->
       <div class="info">
         <p class="name">{{dataInfo.sysUser.userName}}</p>
         <p class="remark">{{dataInfo.sysUser.remark}}</p>
-        <p class="remark">电话：{{dataInfo.sysUser.phonenumber}}</p>
-        <img src="../../static/img/call_icon.svg" class="call-icon" @click="callPhone">
       </div>
+      <img src="../../static/img/call_icon.svg" class="call-icon" @click="callPhone">
+    </div>
+    <div class="info-panel">
+      <p class="title">职位详情</p>
+      <div class="tags-panel">
+        <div class="tag-item" v-for="(item, index) in dataInfo.brightPoints" :key="index">{{item}}</div>
+      </div>
+      <div v-html="dataInfo.description"></div>
     </div>
     <div class="bottom" v-if="type === '2'">
-      <div class="button-item active">收藏</div>
-      <div class="button-item active">报名</div>
+      <button open-type="share" id="share" plain="true" >
+        <i class="iconfont liht-fenxiang"></i>
+        <p>分享</p>
+      </button>
+      <div class="button-opration" :class="{'active': dataInfo.orderType === '00'}" @click="collect">
+        <i class="iconfont liht-shoucang"></i>
+        <p>收藏</p>
+      </div>
+      <div class="button-publish" @click="apply">立即报名</div>
     </div>
   </div>
 </template>
@@ -29,23 +46,55 @@ export default {
     return {
       id: '',
       type: '',
-      dataInfo: {}
+      dataInfo: {},
+      brightList: []
     }
   },
   onLoad(params) {
     this.id = params.id
     this.type = uni.getStorageSync('loginType')
+    this.getBrightDict()
   },
   mounted() {
-    this.fetchData()
+    uni.showShareMenu({
+      withShareTicket: true,
+      menus: ["shareAppMessage", "shareTimeline"]
+    })
   },
   methods: {
+    // 获取职位亮点字典
+    getBrightDict() {
+      if(uni.getStorageSync('loginType') === '1') {
+        this.$api.getBrightDict().then(res => {
+          this.brightList = res.rows
+          this.fetchData()
+        }).catch(err => {
+          console.log(err)
+        })
+      }else if(uni.getStorageSync('loginType') === '2') {
+        this.$api.getBrightDictTwo().then(res => {
+          this.brightList = res.rows
+          this.fetchData()
+        }).catch(err => {
+          console.log(err)
+        })
+      }
+    },
     fetchData() {
       if(uni.getStorageSync('loginType') === '1') {
         this.$api.getJobInfo({
           id: this.id
         }).then(res => {
           this.dataInfo = res.data
+          // 处理职位亮点
+          this.dataInfo.brightPoints = this.dataInfo.brightPoints.split(',')
+          this.dataInfo.brightPoints.map((inItem, index) => {
+            this.brightList.map(bItem => {
+              if(inItem === bItem.dictValue) {
+                this.dataInfo.brightPoints[index] = bItem.dictLabel
+              }
+            })
+          })
         }).catch(err => {
           console.log(err)
         })
@@ -54,6 +103,15 @@ export default {
           id: this.id
         }).then(res => {
           this.dataInfo = res.data
+          // 处理职位亮点
+          this.dataInfo.brightPoints = this.dataInfo.brightPoints.split(',')
+          this.dataInfo.brightPoints.map((inItem, index) => {
+            this.brightList.map(bItem => {
+              if(inItem === bItem.dictValue) {
+                this.dataInfo.brightPoints[index] = bItem.dictLabel
+              }
+            })
+          })
         }).catch(err => {
           console.log(err)
         })
@@ -73,6 +131,46 @@ export default {
           }
         }
       })
+    },
+    collect() {
+      this.$api.changeStatus({
+        "ptjobSpuId": this.dataInfo.id,
+        "userId": this.dataInfo.userId,
+        "type": "00",
+        "status": "00",
+        "status2": "00",
+      }).then(res => {
+        if(res.code === 200) {
+          uni.showToast({
+            icon:"success",
+            title:'收藏成功！'
+          })
+          // 刷新页面数据
+          this.fetchData()
+        }
+      }).catch(err => {
+        console.log(err)
+      })
+    },
+    apply() {
+      this.$api.changeStatus({
+        "ptjobSpuId": this.dataInfo.id,
+        "userId": this.dataInfo.userId,
+        "type": "01",
+        "status": "01",
+        "status2": "01",
+      }).then(res => {
+        if(res.code === 200) {
+          uni.showToast({
+            icon:"success",
+            title:'报名成功！'
+          })
+          // 刷新页面数据
+          this.fetchData()
+        }
+      }).catch(err => {
+        console.log(err)
+      })
     }
   }
 }
@@ -81,46 +179,78 @@ export default {
 <style lang="scss" scoped>
 .job-detail-page {
   height: 100vh;
-  padding: 32rpx 32rpx 200rpx 32rpx;
+  padding: 0 38rpx 200rpx 38rpx;
   overflow: auto;
-  background: #eeeeee;
+  background: #ffffff;
   box-sizing: border-box;
   .info-panel {
-    position: relative;
     width: 100%;
-    margin: 32rpx 0;
-    padding: 16rpx;
-    border-radius: 10px;
-    background: #ffffff;
+    padding: 50rpx 0;
     box-sizing: border-box;
     overflow: hidden;
-    .salary {
-      color: red;
-      font-size: 48rpx;
+    border-bottom: 1px solid #cfcbcb;
+    .left {
+      display: inline-block;
+      vertical-align: top;
+      width: 500rpx;
+      .name {
+        width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 60rpx;
+        font-weight: bold;
+      }
+      .area {
+        width: 100%;
+        margin-top: 26rpx;
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        i {
+          color: #10AFA9;
+        }
+      }
+    }
+    .right {
+      display: inline-block;
+      vertical-align: top;
+      width: 174rpx;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 33rpx;
+      text-align: right;
+      color: #10AFA9;
+    }
+    .title {
+      font-size: 38rpx;
       font-weight: bold;
-      line-height: 100rpx;
+      line-height: 80rpx;
     }
-    .work-method {
-      color: orange;
-      font-size: 32rpx;
-    }
-    .salary-icon {
-      position: absolute;
-      width: 130rpx;
-      height: 130rpx;
-      top: 20rpx;
-      right: 60rpx;
+    .tags-panel {
+      width: 100%;
+      margin: 36rpx 0;
+      display: flex;
+      .tag-item {
+        margin-right: 8rpx;
+        padding: 0 16rpx;
+        color: #717171;
+        background: #95959522;
+        line-height: 41rpx;
+        font-size: 24rpx;
+      }
     }
     .call-icon {
-      position: absolute;
-      width: 90rpx;
-      height: 90rpx;
-      top: 30rpx;
-      right: 50rpx;
+      width: 45rpx;
+      height: 45rpx;
     }
   }
   .create-info {
     display: flex;
+    justify-content: space-between;
     align-items: center;
     .avatar {
       width: 96rpx;
@@ -129,37 +259,62 @@ export default {
       border-radius: 50%;
     }
     .info {
-      line-height: 40rpx;
+      flex: 1;
+      line-height: 50rpx;
       .name {
         font-size: 40rpx;
       }
       .remark {
+        color: #615e5e;
         font-size: 26rpx;
       }
     }
   }
   .bottom {
     width: 100%;
+    padding: 32rpx;
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
     position: fixed;
     left: 0;
     bottom: 0;
     height: 180rpx;
     background: #ffffff;
-    .button-item {
-      margin-top: 32rpx;
-      width: 120rpx;
-      height: 80rpx;
-      line-height: 80rpx;
-      border-radius: 20rpx;
-      color: rgb(11, 27, 53);
-      background: rgb(235, 235, 192);
+    box-sizing: border-box;
+    box-shadow: 0rpx 0rpx 40rpx rgba(0, 0, 0, 0.2);
+    button {
+      margin: 0;
+      padding: 0;
+      border: none;
+      line-height: 46rpx;
+      i {
+        font-size: 48rpx;
+      }
+      p {
+        font-size: 24rpx;
+      }
+    }
+    .button-opration {
       text-align: center;
+      i {
+        font-size: 48rpx;
+      }
+      p {
+        font-size: 24rpx;
+      }
+    }
+    .button-publish {
+      width: 450rpx;
+      height: 90rpx;
+      line-height: 90rpx;
+      border-radius: 5rpx;
+      color: #ffffff;
+      background: #10AFA9;
+      text-align: center;
+      font-size: 42rpx;
     }
     .active {
-      color: rgb(241, 246, 247);
-      background: rgb(254, 137, 3);
+      color: #10AFA9;
     }
   }
 }

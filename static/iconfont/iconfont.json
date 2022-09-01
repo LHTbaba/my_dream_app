@@ -1,0 +1,114 @@
+{
+  "id": "3164222",
+  "name": "jobDist",
+  "font_family": "iconfont",
+  "css_prefix_text": "liht-",
+  "description": "一个有梦想的职位分配小程序",
+  "glyphs": [
+    {
+      "icon_id": "577389",
+      "name": "坐标-fill",
+      "font_class": "zuobiaofill",
+      "unicode": "e768",
+      "unicode_decimal": 59240
+    },
+    {
+      "icon_id": "68268",
+      "name": "分享",
+      "font_class": "fenxiang",
+      "unicode": "e602",
+      "unicode_decimal": 58882
+    },
+    {
+      "icon_id": "629364",
+      "name": "完成",
+      "font_class": "wancheng",
+      "unicode": "e654",
+      "unicode_decimal": 58964
+    },
+    {
+      "icon_id": "77828",
+      "name": "收藏",
+      "font_class": "shoucang",
+      "unicode": "e601",
+      "unicode_decimal": 58881
+    },
+    {
+      "icon_id": "5809083",
+      "name": "人员报名",
+      "font_class": "renyuanbaoming",
+      "unicode": "e65b",
+      "unicode_decimal": 58971
+    },
+    {
+      "icon_id": "18164283",
+      "name": "握手,合作,协作",
+      "font_class": "cooperation",
+      "unicode": "e85d",
+      "unicode_decimal": 59485
+    },
+    {
+      "icon_id": "9826663",
+      "name": "拨打电话",
+      "font_class": "bodadianhua",
+      "unicode": "e614",
+      "unicode_decimal": 58900
+    },
+    {
+      "icon_id": "3901162",
+      "name": "期望薪资",
+      "font_class": "qiwangxinzi",
+      "unicode": "e603",
+      "unicode_decimal": 58883
+    },
+    {
+      "icon_id": "1973188",
+      "name": "男头像",
+      "font_class": "user__easyico",
+      "unicode": "e600",
+      "unicode_decimal": 58880
+    },
+    {
+      "icon_id": "8949009",
+      "name": "岗位",
+      "font_class": "gangwei",
+      "unicode": "e658",
+      "unicode_decimal": 58968
+    },
+    {
+      "icon_id": "20853332",
+      "name": "岗位管理",
+      "font_class": "gangweiguanli",
+      "unicode": "e6a4",
+      "unicode_decimal": 59044
+    },
+    {
+      "icon_id": "31095209",
+      "name": "岗位管理-copy",
+      "font_class": "gangweiguanli-active",
+      "unicode": "edc0",
+      "unicode_decimal": 60864
+    },
+    {
+      "icon_id": "31095211",
+      "name": "岗位-copy-copy",
+      "font_class": "gangwei-active-copy",
+      "unicode": "edc1",
+      "unicode_decimal": 60865
+    },
+    {
+      "icon_id": "1092144",
+      "name": "加号",
+      "font_class": "jiahao",
+      "unicode": "e62f",
+      "unicode_decimal": 58927
+    },
+    {
+      "icon_id": "788026",
+      "name": "退出",
+      "font_class": "tuichu",
+      "unicode": "e647",
+      "unicode_decimal": 58951
+    }
+  ]
+}

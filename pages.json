@@ -3,14 +3,16 @@
 		{
 			"path": "pages/home/index",
 			"style": {
-				"navigationBarTitleText": "首页"
+				"navigationBarTitleText": "职位",
+				"navigationBarBackgroundColor": "#38C1BA",
+				"navigationBarTextStyle": "#ffffff"
 			}
 		},
 		{
 			"path": "pages/select/index",
 			"style": {
 				"navigationBarTitleText": "选择角色",
-				"navigationBarBackgroundColor": "#2ea44f",
+				"navigationBarBackgroundColor": "#10AFA9",
 				"navigationBarTextStyle": "#ffffff"
 			}
 		},
@@ -35,14 +37,14 @@
 	],
 	"tabBar": {
     "color": "#7A7E83",
-    "selectedColor": "#1ab109",
+    "selectedColor": "#10AFA9",
     "borderStyle": "black",
     "backgroundColor": "#ffffff",
     "list": [{
         "pagePath": "pages/home/index",
         "iconPath": "static/tabIcon/home.png",
         "selectedIconPath": "static/tabIcon/home-selected.png",
-        "text": "首页"
+        "text": "职位"
     }, {
         "pagePath": "pages/user/index",
         "iconPath": "static/tabIcon/user.png",
