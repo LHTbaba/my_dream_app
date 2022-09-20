@@ -8,42 +8,29 @@
 			</view>
 		</view>
 		<!-- <button open-type="getPhoneNumber" @getphonenumber="getPhoneNumber" withCredentials="true" @click="getNumber">手机号一键登录</button> -->
-		<template v-if="type === '2'">
-			<view class="block-panel">
-				<view class="block-item" @click="goComplainList('')">
-					<i class="iconfont liht-shoucang number one-number"></i>
-					<p class="title-text">已收藏</p>
-				</view>
-				<view class="block-item" @click="goComplainList('002')">
-					<i class="iconfont liht-renyuanbaoming number two-number"></i>
-					<p class="title-text">已报名</p>
-				</view>
+		<view class="block-panel">
+			<view class="block-item" @click="toList('01')">
+				<i class="iconfont liht-renyuanbaoming number two-number"></i>
+				<p class="title-text">已报名</p>
 			</view>
-			<view class="block-panel">
-				<view class="block-item" @click="goComplainList('003')">
-					<i class="iconfont liht-cooperation number three-number"></i>
-					<p class="title-text">已录用</p>
-				</view>
+			<view class="block-item" @click="toList('02')">
+				<i class="iconfont liht-cooperation number three-number"></i>
+				<p class="title-text">已录用</p>
 			</view>
-		</template>
-		<template v-else>
-			<view class="block-panel">
-				<view class="block-item" @click="goComplainList('002')">
-					<i class="iconfont liht-renyuanbaoming number two-number"></i>
-					<p class="title-text">报名总人数</p>
-				</view>
-				<view class="block-item" @click="goComplainList('003')">
-					<i class="iconfont liht-cooperation number three-number"></i>
-					<p class="title-text">录用总人数</p>
-				</view>
-			</view>
-		</template>
+		</view>
 		<view class="setting">
 			<view class="setting-panel">
 				<p class="title">设置选项</p>
+				<view class="func-item" @click="toAgreement">
+					<view class="left-content">
+						<i class="iconfont liht-yonghuxieyi"></i>
+						<p class="func-text">用户协议</p>
+					</view>
+					<view class="right-content">〉</view>
+				</view>
 				<view class="func-item" @click="logOut">
 					<view class="left-content">
-						<img src="/static/img/log-out.png">
+						<i class="iconfont liht-tuichu1"></i>
 						<p class="func-text">退出登录</p>
 					</view>
 					<view class="right-content">〉</view>
@@ -57,14 +44,12 @@
 	export default {
 		data() {
 			return {
-				type: '',
 				avatar: '',
 				name: '',
 				statisticsNum: {}
 			}
 		},
 		onShow() {
-			this.type = uni.getStorageSync('loginType')
 			this.avatar = this.$store.state.userInfo.avatarUrl
 			this.name = this.$store.state.userInfo.nickName
 			// this.getStatistics()
@@ -80,8 +65,13 @@
 				//errMsg
 				//iv
 			},
+			toList(type) {
+				uni.navigateTo({
+					url: '/pages/search/userList?type=' + type
+				})
+			},
       logins() {
-				if(this.$store.state.loginType) {
+				if(this.$store.state.isLogin) {
 					uni.showToast({
 						icon: "none",
 						title: '已经是登录状态，不用重复登录！'
@@ -138,8 +128,13 @@
 					console.log(err)
 				})
 			},
+			toAgreement() {
+				uni.navigateTo({
+					url: '/pages/user/agreement'
+				})
+			},
 			logOut() {
-				if(uni.getStorageSync('loginType')) {
+				if(uni.getStorageSync('isLogin')) {
 					// 登录状态下可退出登录
 					uni.showModal({
 						title: '提示',
@@ -278,13 +273,12 @@
 			border-bottom: 2rpx solid #F1F2F3;
 			.left-content {
 				display: flex;
-				img {
-					width: 40rpx;
-					height: 40rpx;
+				color: #202236;
+				i {
+					font-size: 38rpx;
 				}
 				.func-text {
 					margin-left: 46rpx;
-					color: #202236;
 					font-family: Source Han Sans CN;
 					font-weight: medium;
 					font-size: 28rpx;

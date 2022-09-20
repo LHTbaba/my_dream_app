@@ -8,7 +8,7 @@
           {{dataInfo.areaName}}
         </p>
       </div>
-      <div class="right">{{dataInfo.salary}}/{{dataInfo.salaryStyle}}</div>
+      <div class="right">{{dataInfo.salary}}元/{{dataInfo.salaryStyle}}</div>
     </div>
     <div class="info-panel create-info">
       <img class="avatar" src="../../static/img/avatar.svg">
@@ -26,16 +26,12 @@
       </div>
       <div v-html="dataInfo.description"></div>
     </div>
-    <div class="bottom" v-if="type === '2'">
+    <div class="bottom">
       <button open-type="share" id="share" plain="true" >
         <i class="iconfont liht-fenxiang"></i>
         <p>分享</p>
       </button>
-      <div class="button-opration" :class="{'active': dataInfo.orderType === '00'}" @click="collect">
-        <i class="iconfont liht-shoucang"></i>
-        <p>收藏</p>
-      </div>
-      <div class="button-publish" @click="apply">立即报名</div>
+      <div class="button-publish" @click="apply">{{dataInfo.orderType === '01' ? '已报名' : '立即报名'}}</div>
     </div>
   </div>
 </template>
@@ -45,14 +41,12 @@ export default {
   data() {
     return {
       id: '',
-      type: '',
       dataInfo: {},
       brightList: []
     }
   },
   onLoad(params) {
     this.id = params.id
-    this.type = uni.getStorageSync('loginType')
     this.getBrightDict()
   },
   mounted() {
@@ -64,58 +58,32 @@ export default {
   methods: {
     // 获取职位亮点字典
     getBrightDict() {
-      if(uni.getStorageSync('loginType') === '1') {
-        this.$api.getBrightDict().then(res => {
-          this.brightList = res.rows
-          this.fetchData()
-        }).catch(err => {
-          console.log(err)
-        })
-      }else if(uni.getStorageSync('loginType') === '2') {
-        this.$api.getBrightDictTwo().then(res => {
-          this.brightList = res.rows
-          this.fetchData()
-        }).catch(err => {
-          console.log(err)
-        })
-      }
+      this.$api.getBrightDict({
+        dictType: 'sys_ptjob_point'
+      }).then(res => {
+        this.brightList = res.rows
+        this.fetchData()
+      }).catch(err => {
+        console.log(err)
+      })
     },
     fetchData() {
-      if(uni.getStorageSync('loginType') === '1') {
-        this.$api.getJobInfo({
-          id: this.id
-        }).then(res => {
-          this.dataInfo = res.data
-          // 处理职位亮点
-          this.dataInfo.brightPoints = this.dataInfo.brightPoints.split(',')
-          this.dataInfo.brightPoints.map((inItem, index) => {
-            this.brightList.map(bItem => {
-              if(inItem === bItem.dictValue) {
-                this.dataInfo.brightPoints[index] = bItem.dictLabel
-              }
-            })
+      this.$api.getJobInfo({
+        id: this.id
+      }).then(res => {
+        this.dataInfo = res.data
+        // 处理职位亮点
+        this.dataInfo.brightPoints = this.dataInfo.brightPoints.split(',')
+        this.dataInfo.brightPoints.map((inItem, index) => {
+          this.brightList.map(bItem => {
+            if(inItem === bItem.dictValue) {
+              this.dataInfo.brightPoints[index] = bItem.dictLabel
+            }
           })
-        }).catch(err => {
-          console.log(err)
         })
-      }else if(uni.getStorageSync('loginType') === '2') {
-        this.$api.getJobInfoTwo({
-          id: this.id
-        }).then(res => {
-          this.dataInfo = res.data
-          // 处理职位亮点
-          this.dataInfo.brightPoints = this.dataInfo.brightPoints.split(',')
-          this.dataInfo.brightPoints.map((inItem, index) => {
-            this.brightList.map(bItem => {
-              if(inItem === bItem.dictValue) {
-                this.dataInfo.brightPoints[index] = bItem.dictLabel
-              }
-            })
-          })
-        }).catch(err => {
-          console.log(err)
-        })
-      }
+      }).catch(err => {
+        console.log(err)
+      })
     },
     callPhone() {
       uni.showModal({
@@ -132,45 +100,34 @@ export default {
         }
       })
     },
-    collect() {
-      this.$api.changeStatus({
-        "ptjobSpuId": this.dataInfo.id,
-        "userId": this.dataInfo.userId,
-        "type": "00",
-        "status": "00",
-        "status2": "00",
-      }).then(res => {
-        if(res.code === 200) {
-          uni.showToast({
-            icon:"success",
-            title:'收藏成功！'
-          })
-          // 刷新页面数据
-          this.fetchData()
-        }
-      }).catch(err => {
-        console.log(err)
-      })
-    },
     apply() {
-      this.$api.changeStatus({
-        "ptjobSpuId": this.dataInfo.id,
-        "userId": this.dataInfo.userId,
-        "type": "01",
-        "status": "01",
-        "status2": "01",
-      }).then(res => {
-        if(res.code === 200) {
-          uni.showToast({
-            icon:"success",
-            title:'报名成功！'
-          })
-          // 刷新页面数据
-          this.fetchData()
+      uni.requestSubscribeMessage({
+        //此处填写刚才申请模板的模板ID
+        tmplIds: ['bLsulsVVDmb3LE9FEZaEC8KBW9smuKnvEjM6o7asM_o'],
+        success (res) {
+          console.log(res)
         }
-      }).catch(err => {
-        console.log(err)
       })
+      if(this.dataInfo.orderType !== '01') {
+        this.$api.changeStatus({
+          "ptjobSpuId": this.dataInfo.id,
+          "userId": this.dataInfo.userId,
+          "type": "01",
+          "status": "01",
+          "status2": "01",
+        }).then(res => {
+          if(res.code === 200) {
+            uni.showToast({
+              icon:"success",
+              title:'报名成功！'
+            })
+            // 刷新页面数据
+            this.fetchData()
+          }
+        }).catch(err => {
+          console.log(err)
+        })
+      }
     }
   }
 }
@@ -283,7 +240,7 @@ export default {
     box-sizing: border-box;
     box-shadow: 0rpx 0rpx 40rpx rgba(0, 0, 0, 0.2);
     button {
-      margin: 0;
+      margin-left: 25rpx;
       padding: 0;
       border: none;
       line-height: 46rpx;
@@ -294,17 +251,8 @@ export default {
         font-size: 24rpx;
       }
     }
-    .button-opration {
-      text-align: center;
-      i {
-        font-size: 48rpx;
-      }
-      p {
-        font-size: 24rpx;
-      }
-    }
     .button-publish {
-      width: 450rpx;
+      width: 570rpx;
       height: 90rpx;
       line-height: 90rpx;
       border-radius: 5rpx;

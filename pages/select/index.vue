@@ -1,21 +1,19 @@
 <template>
-  <view class="content">
-    <view class="inner_box">
-      <view class="inner_title" style="z-index: 99;">
-        请选择角色
-      </view>
-      <view class="inner_item" @click="toLogin('1')">
-        <image class="logo" src="../../static/img/ganbu.png" mode=""></image>
-        <text class="inner_text">我是代理</text>
-        <image class="arrow" src="../../static/img/arrow.png" mode=""></image>
-      </view>
-      <view class="inner_item" @click="toLogin('2')">
-        <image class="logo" src="../../static/img/nonghu.png" mode=""></image>
-        <text class="inner_text">我是工人</text>
-        <image class="arrow" src="../../static/img/arrow.png" mode=""></image>
-      </view>
-    </view>
-  </view>
+  <div class="select-login-page">
+    <div class="content">
+      <img class="logo" src="../../static/img/logo.png">
+      <p class="text">君鼎JOB</p>
+      <p class="sub-text">“带上好奇探索世界”</p>
+      <button class="wechat-login" @click="toLogin">
+        <img src="../../static/img/wechat.png">
+        授权
+      </button>
+      <p class="remind-text">如果您点击授权，您将同意并授权</p>
+      <p class="remind-text">
+        <span class="blue">《用户服务协议》</span>、<span class="blue">《隐私政策》</span>
+      </p>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -47,110 +45,112 @@ export default {
   mounted() {
   },
   methods: {
-    toLogin(type){
-      if(type=="1"){
-        uni.reLaunch({
-          url: '/pages/login/index'
-        })
-      }else{
-				// 获取用户信息
-				uni.getUserProfile({
-					desc:"用于完善用户信息",
-					success: (resp) => {
-						this.$store.commit('getUserinfo', resp.userInfo)
-						uni.showToast({
-							icon:"none",
-							title:'获取成功'
-						})
-            uni.login({
-              provider: 'weixin',
-              success: resd => {
-                uni.request({
-                  url: config.baseUrl+'/prod-api/weixin/api/ma/wxuser/login',
-                  header: {
-                    'app-id': 'wx9a60b1a091b01514',
-                    'Content-Type': 'application/json;charset=UTF-8'
-                  },
-                  data: {
-                    'jsCode': resd.code
-                  },
-                  method:'POST', 
-                  success(res) {
-                    uni.setStorageSync('loginType', '2')
-                    uni.setStorageSync('sessionKey', res.data.data.sessionKey)
-                    uni.reLaunch({
-                      url: '/pages/home/index'
-                    })
-                  }
-                })
-              },
-              fail: err => {
-                console.log('登录失败：', err)
-              }
-            })
-					},
-					fail: (err) => {
-						console.log(err)
-						uni.showToast({
-							icon:"none",
-							title:'用户拒绝获取'
-						})
-					}  
-				})
-      }
+    toLogin(){
+      // 获取用户信息
+      uni.getUserProfile({
+        desc:"用于完善用户信息",
+        success: (resp) => {
+          this.$store.commit('getUserinfo', resp.userInfo)
+          uni.showToast({
+            icon:"none",
+            title:'获取成功'
+          })
+          uni.login({
+            provider: 'weixin',
+            success: resd => {
+              uni.request({
+                url: config.baseUrl+'/prod-api/weixin/api/ma/wxuser/login',
+                header: {
+                  'app-id': 'wx9a60b1a091b01514',
+                  'Content-Type': 'application/json;charset=UTF-8'
+                },
+                data: {
+                  'jsCode': resd.code
+                },
+                method:'POST', 
+                success(res) {
+                  uni.setStorageSync('sessionKey', res.data.data.sessionKey)
+                  uni.reLaunch({
+                    url: '/pages/home/index'
+                  })
+                }
+              })
+            },
+            fail: err => {
+              console.log('登录失败：', err)
+            }
+          })
+        },
+        fail: (err) => {
+          console.log(err)
+          uni.showToast({
+            icon:"none",
+            title:'用户拒绝获取'
+          })
+        }  
+      })
     }
   }
 }
 </script>
 
 <style scoped lang="scss">
-.content{
-  display: flex;
-  width: 100%;
+.select-login-page {
   height: 100vh;
+  display: flex;
   justify-content: center;
-  background: #10AFA9;
-  .inner_box{
+  align-items: center;
+  background: linear-gradient(180deg, #09b3ad 15.51%, #85ccca 91.14%);
+  .content {
+    width: 700rpx;
+    height: calc(100vh - 600rpx);
     display: flex;
     flex-direction: column;
     align-items: center;
-    .inner_title{
-      font-size: 60rpx;
-      font-weight: bold;
-      margin: 212rpx 0 150rpx 0;
-      color: #ffffff;
+    background: #FFFFFF;
+    border-radius: 48rpx;
+    .logo {
+      width: 160rpx;
+      height: 160rpx;
+      margin: 80rpx 0 32rpx 0;
     }
-    .inner_item{
-      width: 590rpx;
-      height: 240rpx;
+    .text {
+      font-size: 40rpx;
+      font-weight: bold;
+      line-height: 60rpx;
+      color: #191D23;
+    }
+    .sub-text {
+      font-size: 36rpx;
+      font-weight: bold;
+      line-height: 120rpx;
+      color: #23272e;
+    }
+    .wechat-login {
+      width: 584rpx;
+      height: 116rpx;
       display: flex;
-      justify-content: center;
       align-items: center;
-      margin-bottom: 64rpx;
-      position: relative;
-      border-radius: 16rpx;
-      border: 1rpx solid rgba(255, 255, 255, 1);
-      background: rgba(255, 255, 255, 0.3);
-      .bg_img{
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        left: 0;
-        top: 0;
+      justify-content: center;
+      margin-top: 200rpx;
+      margin-bottom: 30rpx;
+      border-radius: 60rpx;
+      background: #10AFA9;
+      color: #ffffff;
+      line-height: 116rpx;
+      img {
+        width: 56rpx;
+        height: 56rpx;
+        margin-right: 25rpx;
       }
-      .logo{
-        width: 144rpx;
-        height: 144rpx;
-        margin-right: 106rpx;
-      }
-      .inner_text{
-        color: #ffffff;
-        font-size: 40rpx;
-      }
-      .arrow {
-        width: 32rpx;
-        height: 32rpx;
-        margin-left: 20rpx;
+    }
+    .remind-text {
+      color: #aaaaaa;
+      line-height: 40rpx;
+      text-align: center;
+      font-size: 30rpx;
+      .blue {
+        color: #10AFA9;
       }
     }
   }

@@ -165,7 +165,6 @@
 									uni.reLaunch({
 										url: '/pages/home/index'
 									})
-									uni.setStorageSync('loginType', '1')
 									uni.setStorageSync('token', res.data.token)
 								}else {
 									uni.showToast({

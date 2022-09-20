@@ -1,31 +1,22 @@
 <template>
   <div class="cjpf-page">
-    <div class="header-bar">
-      <div class="search">
-        <uni-search-bar v-model="searchKey" radius="100" placeholder="搜索企业" bgColor="#74d4cf" clearButton="none" cancelButton="none" @confirm="search" />
-      </div>
-      <div class="change-panel">
-        <p class="change-text" :class="{'active': type === '1'}" @click="changeType('1')">线上兼职</p>
-        <p class="change-text" :class="{'active': type === '2'}" @click="changeType('2')">线下兼职</p>
-      </div>
-    </div>
     <scroll-view class="content-panel" scroll-y="true" @scrolltolower="scrolltolower">
-      <div class="content-item" v-for="(item, index) in dataList" :key="index" @click="seeResult(item)">
+      <div class="content-item" v-for="(item, index) in dataList" :key="index" @click="seeResult(item.ptjobSpuId)">
         <div class="line-one">
-          <p class="left">{{item.companyName}}</p>
-          <p class="right">{{item.salary}}元/{{item.salaryStyle}}</p>
+          <p class="left">{{item.ptjobSpu.companyName}}</p>
+          <p class="right">{{item.ptjobSpu.salary}}元/{{item.ptjobSpu.salaryStyle}}</p>
         </div>
         <div class="line-two">
-          <p class="text">{{item.name}}</p>
-          <p class="text">{{item.workMethod}}</p>
+          <p class="text">{{item.ptjobSpu.name}}</p>
+          <p class="text">{{item.ptjobSpu.workMethod}}</p>
         </div>
         <div class="line-three">
-          <p class="tag-item" v-for="(inItem, index) in item.brightPoints" :key="index">{{inItem}}</p>
+          <p class="tag-item" v-for="(inItem, index) in item.ptjobSpu.brightPoints" :key="index">{{inItem}}</p>
         </div>
         <div class="line-four">
           <div class="left">
             <i class="iconfont liht-zuobiaofill"></i>
-            <p>{{item.areaName}}</p>
+            <p>{{item.ptjobSpu.areaName}}</p>
           </div>
           <div class="right">立即查看</div>
         </div>
@@ -41,8 +32,7 @@
 export default {
   data() {
     return {
-      type: '1',
-      searchKey: '',
+      type: '01',
       dataList: [],
       pageSize: 10,
       pageIndex: 1,
@@ -52,20 +42,23 @@ export default {
       brightList: []
     }
   },
-  onShow() {
-    if(uni.getStorageSync('isLogin')) {
-      this.pageIndex = 1
-      this.getBrightDict()
+  onLoad(params) {
+    this.type = params.type
+    if(this.type === '01') {
+      uni.setNavigationBarTitle({
+        title: "已报名"
+      })
     }else {
-      uni.reLaunch({
-        url: '/pages/select/index'
+      uni.setNavigationBarTitle({
+        title: "已录用"
       })
     }
   },
+  onShow() {
+    this.pageIndex = 1
+    this.getBrightDict()
+  },
   methods: {
-    changeType(type) {
-      this.type = type
-    },
     // 获取职位亮点字典
     getBrightDict() {
       this.$api.getBrightDict({
@@ -79,7 +72,8 @@ export default {
     },
     // 获取列表数据
     fetchData() {
-      this.$api.getJobList({
+      this.$api.searchJobList({
+        type: this.type,
         pageNum: this.pageIndex,
         pageSize: this.pageSize
       }).then(res => {
@@ -87,11 +81,11 @@ export default {
         this.total = res.total
         // 处理职位亮点
         this.dataList.map(item => {
-          item.brightPoints = item.brightPoints.split(',')
-          item.brightPoints.map((inItem, index) => {
+          item.ptjobSpu.brightPoints = item.ptjobSpu.brightPoints.split(',')
+          item.ptjobSpu.brightPoints.map((inItem, index) => {
             this.brightList.map(bItem => {
               if(inItem === bItem.dictValue) {
-                item.brightPoints[index] = bItem.dictLabel
+                item.ptjobSpu.brightPoints[index] = bItem.dictLabel
               }
             })
           })
@@ -100,25 +94,17 @@ export default {
         console.log(err)
       })
     },
-    search() {
-      this.pageIndex = 1
-      this.fetchData()
-    },
-    changeSort() {
-      this.sort = this.sort === '1' ? '2' : '1'
-      this.pageIndex = 1
-      this.fetchData()
-    },
-    seeResult(item) {
+    seeResult(id) {
       uni.navigateTo({
-        url:'/pages/jobDetail/index?id=' + item.id
+        url:'/pages/jobDetail/index?id=' + id
       })
     },
     scrolltolower() {
       if(this.pageSize * this.pageIndex < this.total) {
         this.pageIndex++
         uni.showLoading()
-        this.$api.getJobList({
+        this.$api.searchJobList({
+          type: this.type,
           pageNum: this.pageIndex,
           pageSize: this.pageSize
         }).then(res => {
@@ -136,51 +122,9 @@ export default {
 
 <style lang="scss" scoped>
 .cjpf-page {
-  position: relative;
-  padding-top: 250rpx;
   box-sizing: border-box;
-  .header-bar {
-    position: absolute;
-    top: 0;
-    width: 100%;
-    height: 250rpx;
-    padding: 92rpx 0 0 38rpx;
-    box-sizing: border-box;
-    background: #38C1BA;
-    .search {
-      width: 504rpx;
-      /deep/.uni-searchbar {
-        padding: 0;
-        .uni-searchbar__box {
-          justify-content: flex-start;
-          .uni-icons {
-            color: #ffffff !important;
-          }
-          .uni-searchbar__text-placeholder {
-            color: #ffffff !important;
-          }
-          .uni-searchbar__box-search-input {
-            color: #ffffff !important;
-          }
-        }
-      }
-    }
-    .change-panel {
-      display: flex;
-      margin-top: 30rpx;
-      .change-text {
-        margin-right: 30rpx;
-        font-size: 32rpx;
-        font-weight: bold;
-        color: #b0e7e6;
-      }
-      .active {
-        color: #ffffff;
-      }
-    }
-  }
   .content-panel {
-    height: calc(100vh - 250rpx);
+    height: 100vh;
     overflow: auto;
     .content-item {
       padding: 36rpx;

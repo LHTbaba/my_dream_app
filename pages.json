@@ -3,17 +3,16 @@
 		{
 			"path": "pages/home/index",
 			"style": {
-				"navigationBarTitleText": "职位",
-				"navigationBarBackgroundColor": "#38C1BA",
-				"navigationBarTextStyle": "#ffffff"
+				"navigationStyle": "custom"
 			}
 		},
 		{
 			"path": "pages/select/index",
 			"style": {
-				"navigationBarTitleText": "选择角色",
+				"navigationBarTitleText": "登录",
 				"navigationBarBackgroundColor": "#10AFA9",
-				"navigationBarTextStyle": "#ffffff"
+				"navigationBarTextStyle": "#ffffff",
+				"navigationStyle": "custom"
 			}
 		},
 		{
@@ -32,6 +31,18 @@
 			"path": "pages/jobDetail/index",
 			"style": {
 				"navigationBarTitleText": "职位详情"
+			}
+		},
+		{
+			"path": "pages/search/userList",
+			"style": {
+				"navigationBarTitleText": "已报名"
+			}
+		},
+		{
+			"path": "pages/user/agreement",
+			"style": {
+				"navigationBarTitleText": "用户服务协议"
 			}
 		}
 	],
