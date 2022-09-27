@@ -1,5 +1,5 @@
 <template>
-  <div class="cjpf-page">
+  <div class="home-page">
     <div class="header-bar">
       <div class="search">
         <uni-search-bar v-model="searchKey" radius="100" placeholder="搜索企业" bgColor="#74d4cf" clearButton="none" cancelButton="none" @confirm="search" />
@@ -56,6 +56,22 @@ export default {
     if(uni.getStorageSync('isLogin')) {
       this.pageIndex = 1
       this.getBrightDict()
+      uni.showModal({
+        title: '您未完善信息',
+        content: '是否进入完善信息页面？',
+        success(res) {
+          if (res.confirm) {
+            uni.navigateTo({
+              url: '/pages/completeInfo/index'
+            })
+          } else if (res.cancel) {
+            uni.showToast({
+              icon: 'none',
+              title: '已取消，可稍后完善'
+            })
+          }
+        }
+      })
     }else {
       uni.reLaunch({
         url: '/pages/select/index'
@@ -79,10 +95,12 @@ export default {
     },
     // 获取列表数据
     fetchData() {
+      uni.showLoading()
       this.$api.getJobList({
         pageNum: this.pageIndex,
         pageSize: this.pageSize
       }).then(res => {
+        uni.hideLoading()
         this.dataList = res.rows
         this.total = res.total
         // 处理职位亮点
@@ -122,6 +140,7 @@ export default {
           pageNum: this.pageIndex,
           pageSize: this.pageSize
         }).then(res => {
+          uni.hideLoading()
           this.dataList = this.dataList.concat(res.rows)
         }).catch(err => {
           console.log(err)
@@ -135,7 +154,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.cjpf-page {
+.home-page {
   position: relative;
   padding-top: 250rpx;
   box-sizing: border-box;

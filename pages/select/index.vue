@@ -100,7 +100,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(180deg, #09b3ad 15.51%, #85ccca 91.14%);
+  background: #09b3ad;
   .content {
     width: 700rpx;
     height: calc(100vh - 600rpx);

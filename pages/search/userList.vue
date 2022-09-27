@@ -1,5 +1,5 @@
 <template>
-  <div class="cjpf-page">
+  <div class="user-list-page">
     <scroll-view class="content-panel" scroll-y="true" @scrolltolower="scrolltolower">
       <div class="content-item" v-for="(item, index) in dataList" :key="index" @click="seeResult(item.ptjobSpuId)">
         <div class="line-one">
@@ -72,11 +72,13 @@ export default {
     },
     // 获取列表数据
     fetchData() {
+      uni.showLoading()
       this.$api.searchJobList({
         type: this.type,
         pageNum: this.pageIndex,
         pageSize: this.pageSize
       }).then(res => {
+        uni.hideLoading()
         this.dataList = res.rows
         this.total = res.total
         // 处理职位亮点
@@ -108,6 +110,18 @@ export default {
           pageNum: this.pageIndex,
           pageSize: this.pageSize
         }).then(res => {
+          uni.hideLoading()
+          // 处理职位亮点
+          res.rows.map(item => {
+            item.ptjobSpu.brightPoints = item.ptjobSpu.brightPoints.split(',')
+            item.ptjobSpu.brightPoints.map((inItem, index) => {
+              this.brightList.map(bItem => {
+                if(inItem === bItem.dictValue) {
+                  item.ptjobSpu.brightPoints[index] = bItem.dictLabel
+                }
+              })
+            })
+          })
           this.dataList = this.dataList.concat(res.rows)
         }).catch(err => {
           console.log(err)
@@ -121,7 +135,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.cjpf-page {
+.user-list-page {
   box-sizing: border-box;
   .content-panel {
     height: 100vh;
