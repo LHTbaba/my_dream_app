@@ -21,6 +21,13 @@
 		<view class="setting">
 			<view class="setting-panel">
 				<p class="title">设置选项</p>
+				<view class="func-item" @click="toCompleteInfo">
+					<view class="left-content">
+						<i class="iconfont liht-jibenxinxi"></i>
+						<p class="func-text">基本信息</p>
+					</view>
+					<view class="right-content">〉</view>
+				</view>
 				<view class="func-item" @click="toAgreement">
 					<view class="left-content">
 						<i class="iconfont liht-yonghuxieyi"></i>
@@ -41,141 +48,150 @@
 </template>
 
 <script>
-	export default {
-		data() {
-			return {
-				avatar: '',
-				name: '',
-				statisticsNum: {}
-			}
-		},
-		onShow() {
+export default {
+	data() {
+		return {
+			avatar: '',
+			name: '',
+			statisticsNum: {}
+		}
+	},
+	onShow() {
+		// 如果获取了用户信息
+		if(this.$store.state.userInfo.avatarUrl) {
 			this.avatar = this.$store.state.userInfo.avatarUrl
 			this.name = this.$store.state.userInfo.nickName
-			// this.getStatistics()
+		}else {
+			uni.showModal({
+				title: '您尚未登录',
+				content: '是否登录？',
+				success: res => {
+					if (res.confirm) {
+						// 获取用户信息
+						uni.getUserProfile({
+							desc:"用于完善用户信息",
+							success: (resp) => {
+								this.$store.commit('getUserinfo', resp.userInfo)
+								this.avatar = resp.userInfo.avatarUrl
+								this.name = resp.userInfo.nickName
+								uni.showToast({
+									icon:"none",
+									title:'获取成功'
+								})
+							},
+							fail: (err) => {
+								console.log(err)
+								uni.showToast({
+									icon:"none",
+									title:'用户拒绝获取'
+								})
+							}  
+						})
+					} else if (res.cancel) {
+						uni.showToast({
+							icon: 'none',
+							title: '已取消登录'
+						})
+					}
+				}
+			})
+		}
+	},
+	methods: {
+		getNumber() {
+			console.log('获取手机号')
 		},
-		methods: {
-			getNumber() {
-				console.log('获取手机号')
-			},
-			getPhoneNumber(e) {
-				console.log(e)
-				//e.detail这里会有三个属性
-				//encryptedData
-				//errMsg
-				//iv
-			},
-			toList(type) {
-				uni.navigateTo({
-					url: '/pages/search/userList?type=' + type
+		getPhoneNumber(e) {
+			console.log(e)
+			//e.detail这里会有三个属性
+			//encryptedData
+			//errMsg
+			//iv
+		},
+		toList(type) {
+			uni.navigateTo({
+				url: '/pages/search/userList?type=' + type
+			})
+		},
+		logins() {
+			if(this.$store.state.userInfo.avatarUrl) {
+				uni.showToast({
+					icon: "none",
+					title: '已经是登录状态，不用重复登录！'
 				})
-			},
-      logins() {
-				if(this.$store.state.isLogin) {
-					uni.showToast({
-						icon: "none",
-						title: '已经是登录状态，不用重复登录！'
-					})
-				}else {
-					// 获取用户信息
-					uni.getUserProfile({
-						desc:"用于完善用户信息",
-						success: (res) => {
-							this.$store.commit('getUserinfo', res.userInfo)
-							this.avatar = res.userInfo.avatarUrl
-							this.name = res.userInfo.nickName
-							uni.showToast({
-								icon:"none",
-								title:'获取成功'
-							})
-							// 获取用户code
-							uni.login({
-								success: (res) => {
-									var code = res.code
-									this.$api.login({
-										jsCode: code
-									}).then(res => {
-										this.$store.commit('login', res)
-										this.getStatistics()
-									}).catch(err => {
-										console.log(err)
-									})
-								},
-								fail: (error) => {
-									console.log('login failed ' + error)
-								}
-							})
-						},
-						fail: (err) => {
-							console.log(err)
-							uni.showToast({
-								icon:"none",
-								title:'用户拒绝获取'
-							})
-						}  
-					})
-				}
-      },
-			getStatistics() {
-				//获取统计数据
-				this.$api.getData({
-					'cmd.sqlKey': 'MSP_WX_LZY.SQTJ_LIST',
-					'cmd.sqlType': 'proc',
-					'cmd.QOPENID': this.$store.state.openid
-				}).then(res => {
-					this.statisticsNum = res[0]
-				}).catch(err => {
-					console.log(err)
-				})
-			},
-			toAgreement() {
-				uni.navigateTo({
-					url: '/pages/user/agreement'
-				})
-			},
-			logOut() {
-				if(uni.getStorageSync('isLogin')) {
-					// 登录状态下可退出登录
-					uni.showModal({
-						title: '提示',
-						content: '确认要退出登录吗？',
-						success: (res) => {
-							if (res.confirm) {
-								// 刷新数据
-								this.avatar = ''
-								this.name = ''
-								this.statisticsNum = {}
-								uni.showToast({
-									icon: "none",
-									title: '已退出！'
-								})
-								this.$store.commit('logout', res)
-								uni.navigateTo({
-									url: '/pages/select/index'
-								})
-							}else if (res.cancel) {
-								uni.showToast({
-									icon: "none",
-									title: '用户点击取消'
-								})
-							}
-						}
-					})
-				}else {
-					// 提示用户还未登录
-					uni.showToast({
-						icon: "none",
-						title: '您还未登录呢！'
-					})
-				}
-			},
-			goComplainList(status) {
-				uni.navigateTo({
-					url: `/pages/complainList/index?status=${status}`
+			}else {
+				// 获取用户信息
+				uni.getUserProfile({
+					desc:"用于完善用户信息",
+					success: (res) => {
+						this.$store.commit('getUserinfo', res.userInfo)
+						this.avatar = res.userInfo.avatarUrl
+						this.name = res.userInfo.nickName
+						uni.showToast({
+							icon:"none",
+							title:'获取成功'
+						})
+					},
+					fail: (err) => {
+						console.log(err)
+						uni.showToast({
+							icon:"none",
+							title:'用户拒绝获取'
+						})
+					}  
 				})
 			}
+		},
+		toCompleteInfo() {
+			uni.navigateTo({
+				url: '/pages/completeInfo/index'
+			})
+		},
+		toAgreement() {
+			uni.navigateTo({
+				url: '/pages/user/agreement'
+			})
+		},
+		logOut() {
+			if(uni.getStorageSync('isLogin')) {
+				// 登录状态下可退出登录
+				uni.showModal({
+					title: '提示',
+					content: '确认要退出登录吗？',
+					success: (res) => {
+						if (res.confirm) {
+							// 刷新数据
+							this.avatar = ''
+							this.name = ''
+							this.statisticsNum = {}
+							uni.showToast({
+								icon: "none",
+								title: '已退出！'
+							})
+							this.$store.commit('logout')
+						}else if (res.cancel) {
+							uni.showToast({
+								icon: "none",
+								title: '用户点击取消'
+							})
+						}
+					}
+				})
+			}else {
+				// 提示用户还未登录
+				uni.showToast({
+					icon: "none",
+					title: '您还未登录呢！'
+				})
+			}
+		},
+		goComplainList(status) {
+			uni.navigateTo({
+				url: `/pages/complainList/index?status=${status}`
+			})
 		}
 	}
+}
 </script>
 
 <style lang="scss" scoped>

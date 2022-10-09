@@ -56,12 +56,12 @@ export default {
   },
   onShow() {
     this.pageIndex = 1
-    this.getBrightDict()
+    this.getDict()
   },
   methods: {
     // 获取职位亮点字典
-    getBrightDict() {
-      this.$api.getBrightDict({
+    getDict() {
+      this.$api.getDict({
         dictType: 'sys_ptjob_point'
       }).then(res => {
         this.brightList = res.rows

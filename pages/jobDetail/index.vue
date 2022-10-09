@@ -47,7 +47,7 @@ export default {
   },
   onLoad(params) {
     this.id = params.id
-    this.getBrightDict()
+    this.getDict()
   },
   mounted() {
     uni.showShareMenu({
@@ -57,8 +57,8 @@ export default {
   },
   methods: {
     // 获取职位亮点字典
-    getBrightDict() {
-      this.$api.getBrightDict({
+    getDict() {
+      this.$api.getDict({
         dictType: 'sys_ptjob_point'
       }).then(res => {
         this.brightList = res.rows

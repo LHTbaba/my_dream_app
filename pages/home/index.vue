@@ -2,13 +2,18 @@
   <div class="home-page">
     <div class="header-bar">
       <div class="search">
-        <uni-search-bar v-model="searchKey" radius="100" placeholder="搜索企业" bgColor="#74d4cf" clearButton="none" cancelButton="none" @confirm="search" />
+        <uni-search-bar v-model="searchKey" radius="100" placeholder="搜索职位、公司" bgColor="#74d4cf" clearButton="none" cancelButton="none" @confirm="search" />
       </div>
       <div class="change-panel">
-        <p class="change-text" :class="{'active': type === '1'}" @click="changeType('1')">线上兼职</p>
-        <p class="change-text" :class="{'active': type === '2'}" @click="changeType('2')">线下兼职</p>
+        <p class="change-text">线下兼职</p>
+        <i class="iconfont liht-gongneng"></i>
       </div>
     </div>
+    <swiper indicator-dots indicator-active-color="#FFFFFF" circular autoplay>
+      <swiper-item v-for="(item, index) in imgList" :key="index">
+        <image :src = "item.url" class="banner"></image>
+      </swiper-item>
+    </swiper>
     <scroll-view class="content-panel" scroll-y="true" @scrolltolower="scrolltolower">
       <div class="content-item" v-for="(item, index) in dataList" :key="index" @click="seeResult(item)">
         <div class="line-one">
@@ -38,10 +43,15 @@
 </template>
 
 <script>
+import config from "../../http/config.js";
 export default {
   data() {
     return {
-      type: '1',
+      imgList: [{
+        url: '../../static/img/banner_01.png'
+      }, {
+        url: '../../static/img/banner_02.png'
+      }],
       searchKey: '',
       dataList: [],
       pageSize: 10,
@@ -55,36 +65,64 @@ export default {
   onShow() {
     if(uni.getStorageSync('isLogin')) {
       this.pageIndex = 1
-      this.getBrightDict()
-      uni.showModal({
-        title: '您未完善信息',
-        content: '是否进入完善信息页面？',
-        success(res) {
-          if (res.confirm) {
-            uni.navigateTo({
-              url: '/pages/completeInfo/index'
-            })
-          } else if (res.cancel) {
-            uni.showToast({
-              icon: 'none',
-              title: '已取消，可稍后完善'
-            })
-          }
+      this.getDict()
+      this.$api.isLogdata().then(res => {
+        if(!res.data) {
+          uni.showModal({
+            title: '您未完善信息',
+            content: '是否进入完善信息页面？',
+            success(res) {
+              if (res.confirm) {
+                uni.navigateTo({
+                  url: '/pages/completeInfo/index'
+                })
+              } else if (res.cancel) {
+                uni.showToast({
+                  icon: 'none',
+                  title: '已取消，可稍后完善'
+                })
+              }
+            }
+          })
         }
+      }).catch(err => {
+        console.log(err)
       })
     }else {
-      uni.reLaunch({
-        url: '/pages/select/index'
+      // uni.reLaunch({
+      //   url: '/pages/select/index'
+      // })
+      uni.login({
+        provider: 'weixin',
+        success: resd => {
+          uni.request({
+            url: config.baseUrl+'/prod-api/weixin/api/ma/wxuser/login',
+            header: {
+              'app-id': 'wx9a60b1a091b01514',
+              'Content-Type': 'application/json;charset=UTF-8'
+            },
+            data: {
+              'jsCode': resd.code
+            },
+            method:'POST', 
+            success: res => {
+              uni.setStorageSync('sessionKey', res.data.data.sessionKey)
+              this.$store.commit('login')
+              this.pageIndex = 1
+              this.getDict()
+            }
+          })
+        },
+        fail: err => {
+          console.log('登录失败：', err)
+        }
       })
     }
   },
   methods: {
-    changeType(type) {
-      this.type = type
-    },
     // 获取职位亮点字典
-    getBrightDict() {
-      this.$api.getBrightDict({
+    getDict() {
+      this.$api.getDict({
         dictType: 'sys_ptjob_point'
       }).then(res => {
         this.brightList = res.rows
@@ -186,20 +224,32 @@ export default {
     }
     .change-panel {
       display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-top: 30rpx;
       .change-text {
         margin-right: 30rpx;
         font-size: 32rpx;
         font-weight: bold;
-        color: #b0e7e6;
+        color: #ffffff;
       }
-      .active {
+      i {
+        margin-right: 30rpx;
+        font-size: 28rpx;
         color: #ffffff;
       }
     }
   }
+  swiper {
+    width: 100%;
+    height: 400rpx;
+    .banner {
+      width: 100%;
+      height: 400rpx;
+    }
+  }
   .content-panel {
-    height: calc(100vh - 250rpx);
+    height: calc(100vh - 650rpx);
     overflow: auto;
     .content-item {
       padding: 36rpx;

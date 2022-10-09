@@ -1,4 +1,6 @@
 import config from "./config.js";
+import store from "../store"
+
 const request = (options) => {
     return new Promise((resolve, reject) => {
 		var sessionKey=uni.getStorageSync("sessionKey")
@@ -24,8 +26,12 @@ const request = (options) => {
 					title:"服务器请求错误",
 					mask:false
 				})
+				// uni.reLaunch({
+				// 	url: '/pages/select/index'
+				// })
+				store.commit('logout')
 				uni.reLaunch({
-					url: '/pages/select/index'
+					url: '/pages/home/index'
 				})
 			}
 		}).catch(error => {
@@ -34,7 +40,11 @@ const request = (options) => {
 			uni.showToast({
 				title:"服务器请求错误",
 				mask:false
-			}) 
+			})
+			store.commit('logout')
+			uni.reLaunch({
+				url: '/pages/home/index'
+			})
 		})
 	})
 }

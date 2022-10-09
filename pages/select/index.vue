@@ -55,30 +55,9 @@ export default {
             icon:"none",
             title:'获取成功'
           })
-          uni.login({
-            provider: 'weixin',
-            success: resd => {
-              uni.request({
-                url: config.baseUrl+'/prod-api/weixin/api/ma/wxuser/login',
-                header: {
-                  'app-id': 'wx9a60b1a091b01514',
-                  'Content-Type': 'application/json;charset=UTF-8'
-                },
-                data: {
-                  'jsCode': resd.code
-                },
-                method:'POST', 
-                success(res) {
-                  uni.setStorageSync('sessionKey', res.data.data.sessionKey)
-                  uni.reLaunch({
-                    url: '/pages/home/index'
-                  })
-                }
-              })
-            },
-            fail: err => {
-              console.log('登录失败：', err)
-            }
+          uni.setStorageSync('sessionKey', res.data.data.sessionKey)
+          uni.reLaunch({
+            url: '/pages/home/index'
           })
         },
         fail: (err) => {

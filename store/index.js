@@ -11,10 +11,12 @@ const store=new Vuex.Store({
 	
 	mutations:{
 		getUserinfo(state, userInfo) {
-			state.isLogin = true
 			state.userInfo = userInfo
-			uni.setStorageSync('isLogin', state.isLogin)
 			uni.setStorageSync('userInfo', state.userInfo)
+		},
+		login(state) {
+			state.isLogin = true
+			uni.setStorageSync('isLogin', state.isLogin)
 		},
 		logout(state) {
 			state.isLogin = false
@@ -25,6 +27,9 @@ const store=new Vuex.Store({
 	},
 	actions:{
 		login({commit}){
+			commit("login")
+		},
+		getUserInfo(commit){
 			commit("getUserinfo")
 		},
 		logout({commit}){

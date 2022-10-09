@@ -6,6 +6,20 @@
   "description": "一个有梦想的职位分配小程序",
   "glyphs": [
     {
+      "icon_id": "3282358",
+      "name": "基本信息",
+      "font_class": "jibenxinxi",
+      "unicode": "e637",
+      "unicode_decimal": 58935
+    },
+    {
+      "icon_id": "6289727",
+      "name": "功能",
+      "font_class": "gongneng",
+      "unicode": "e604",
+      "unicode_decimal": 58884
+    },
+    {
       "icon_id": "817824",
       "name": "用户协议",
       "font_class": "yonghuxieyi",
